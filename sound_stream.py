@@ -1,4 +1,5 @@
 import discord
+import os
 from discord.ext import commands
 
 
@@ -16,9 +17,22 @@ async def join(ctx):
     await channel.connect()
 
 
-@bot.command(name="leave", help="Leaves a voice channel")
+@bot.command(
+    name="leave",
+    help="Leaves a voice channel and deletes audio files created by the bot",
+)
 async def leave(ctx):
-    await ctx.voice_client.disconnect()
+    voice_client = ctx.guild.voice_client
+
+    if voice_client and voice_client.is_connected():
+        await voice_client.disconnect()
+
+        # Delete all audio files created by the bot
+        path = os.path.join(os.getcwd(), "user_streams")
+
+        for file in os.listdir(path):
+            if file.startswith(str(ctx.guild.id)):
+                os.remove(file)
 
 
 @bot.event
@@ -31,6 +45,8 @@ async def on_member_update(self, member, before, after):
         user_stream = voice_client.source
 
         # Output the user's audio stream to a separate file
-        with open(f"user_streams/{member.id}_{member.name}.wav", "wb") as f:
+        with open(
+            f"user_streams/{member.guild.id}_{member.id}_{member.name}.wav", "wb"
+        ) as f:
             async for chunk in user_stream:
                 f.write(chunk)
