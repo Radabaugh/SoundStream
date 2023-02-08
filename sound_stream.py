@@ -14,3 +14,8 @@ async def on_ready():
 async def join(ctx):
     channel = ctx.author.voice.channel
     await channel.connect()
+
+
+@bot.command(name="leave", help="Leaves a voice channel")
+async def leave(ctx):
+    await ctx.voice_client.disconnect()
