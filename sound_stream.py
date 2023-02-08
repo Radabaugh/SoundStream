@@ -31,6 +31,6 @@ async def on_member_update(self, member, before, after):
         user_stream = voice_client.source
 
         # Output the user's audio stream to a separate file
-        with open(f"{member.id}_{member.name}.wav", "wb") as f:
+        with open(f"user_streams/{member.id}_{member.name}.wav", "wb") as f:
             async for chunk in user_stream:
                 f.write(chunk)
