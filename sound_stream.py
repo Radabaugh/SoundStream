@@ -44,9 +44,9 @@ async def leave(ctx):
 
 
 @bot.event
-async def on_member_update(self, member, before, after):
+async def on_member_update(before, after):
     # Get the voice client for the voice channel the user is in
-    voice_client = discord.utils.get(self.voice_clients, guild=member.guild)
+    voice_client = after.guild.voice_client
 
     # Check if the user has joined a voice channel
     if after.channel and voice_client and voice_client.is_connected():
@@ -54,7 +54,7 @@ async def on_member_update(self, member, before, after):
 
         # Output the user's audio stream to a separate file
         with open(
-            f"user_streams/{member.guild.id}_{member.id}_{member.name}.wav", "wb"
+            f"user_streams/{after.guild.id}_{after.id}_{after.name}.wav", "wb"
         ) as f:
             async for chunk in user_stream:
                 f.write(chunk)
