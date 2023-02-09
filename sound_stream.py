@@ -8,7 +8,10 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 
-bot = commands.Bot(command_prefix="!")
+intents = discord.Intents.default()
+intents.members = True
+intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 @bot.event
