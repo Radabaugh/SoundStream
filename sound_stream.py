@@ -1,7 +1,9 @@
+import asyncio
 import discord
 import os
 from discord.ext import commands
 from dotenv import load_dotenv
+from stream_recorder import StreamRecorder
 
 
 load_dotenv()
@@ -44,20 +46,22 @@ async def leave(ctx):
 
 
 @bot.event
-async def on_member_update(before, after):
+async def on_voice_state_update(member, before, after):
     # Get the voice client for the voice channel the user is in
-    voice_client = after.guild.voice_client
+    voice_client = after.channel.guild.voice_client
 
     # Check if the user has joined a voice channel
-    if after.channel and voice_client and voice_client.is_connected():
-        user_stream = voice_client.source
+    if after.channel and voice_client:
+        user_stream = StreamRecorder(
+            voice_client,
+            member,
+            file_path=f"user_streams/{member.guild.id}_{member.id}_{member.name}.wav",
+        )
+        await user_stream.start()
 
-        # Output the user's audio stream to a separate file
-        with open(
-            f"user_streams/{after.guild.id}_{after.id}_{after.name}.wav", "wb"
-        ) as f:
-            async for chunk in user_stream:
-                f.write(chunk)
+        await asyncio.sleep(5)
+
+        await user_stream.stop()
 
 
 bot.run(TOKEN)
