@@ -53,8 +53,8 @@ async def on_voice_state_update(member, before, after):
     # Get the voice client for the voice channel the user is in
     voice_client = after.channel.guild.voice_client
 
-    # Check if the user has joined a voice channel
-    if after.channel and voice_client:
+    # Check if the user has joined a voice channel and ignore the bot itself
+    if after.channel and voice_client and member.name != "Sound Stream":
         if member.id not in active_streams:
             user_stream = StreamRecorder(
                 voice_client,
