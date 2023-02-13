@@ -1,4 +1,4 @@
-import asyncio
+import wave
 
 
 class StreamRecorder:
@@ -6,24 +6,28 @@ class StreamRecorder:
         self.voice_client = voice_client
         self.member = member
         self.file_path = file_path
-        self.task = None
+        self.wave_file = None
+        self.running = False
 
     async def start(self):
-        if self.task:
+        if self.running:
             return
 
-        self.task = asyncio.create_task(self._record_stream())
+        self.running = True
+
+        self.wave_file = wave.open(self.file_path, "wb")
+        self.wave_file.setsampwidth(2)
+        self.wave_file.setnchannels(2)
+        self.wave_file.setframerate(48000)
+
+        source = self.voice_client.source
+        async for chunk in source:
+            self.wave_file.writeframes(chunk)
 
     async def stop(self):
-        if not self.task:
+        if not self.running:
             return
 
-        self.task.cancel()
-        self.task = None
-
-    async def _record_stream(self):
-        user_stream = self.voice_client.source
-
-        with open(self.file_path, "ab") as f:
-            async for chunk in user_stream:
-                f.write(chunk)
+        self.running = False
+        self.wave_file.close()
+        self.wave_file = None
