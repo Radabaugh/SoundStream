@@ -9,11 +9,14 @@ from stream_recorder import StreamRecorder
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-
+# Set bot permissions
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
+
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+active_streams = {}
 
 
 @bot.event
@@ -52,16 +55,18 @@ async def on_voice_state_update(member, before, after):
 
     # Check if the user has joined a voice channel
     if after.channel and voice_client:
-        user_stream = StreamRecorder(
-            voice_client,
-            member,
-            file_path=f"user_streams/{member.guild.id}_{member.id}_{member.name}.wav",
-        )
-        await user_stream.start()
+        if member.id not in active_streams:
+            user_stream = StreamRecorder(
+                voice_client,
+                member,
+                file_path=f"user_streams/{member.guild.id}_{member.id}_{member.name}.wav",
+            )
+            await user_stream.start()
+            active_streams[member.id] = user_stream
 
-        await asyncio.sleep(5)
-
-        await user_stream.stop()
+        elif before.channel and voice_client and member.id in active_streams:
+            await active_streams[member.id].stop()
+            del active_streams[member.id]
 
 
 bot.run(TOKEN)
