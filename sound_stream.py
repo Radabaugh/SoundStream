@@ -50,10 +50,10 @@ async def leave(ctx):
 @bot.event
 async def on_voice_state_update(member, before, after):
     # Get the voice client for the voice channel the user is in
-    voice_client = after.channel.guild.voice_client
+    voice_client = member.guild.voice_client
 
-    # Check if the user has joined a voice channel and ignore the bot itself
-    if after.channel and voice_client and member.name != "Sound Stream":
+    # Ignore the bot as a user
+    if (voice_client and member.name != "Sound Stream"):
         if member.id not in active_streams:
             user_stream = StreamRecorder(
                 voice_client,
@@ -62,7 +62,6 @@ async def on_voice_state_update(member, before, after):
             )
             await user_stream.start()
             active_streams[member.id] = user_stream
-
         elif before.channel and voice_client and member.id in active_streams:
             await active_streams[member.id].stop()
             del active_streams[member.id]
