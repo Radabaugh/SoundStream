@@ -18,11 +18,12 @@ class StreamRecorder:
         self.wave_file = wave.open(self.file_path, "wb")
         self.wave_file.setsampwidth(2)
         self.wave_file.setnchannels(2)
-        self.wave_file.setframerate(48000)
+        self.wave_file.setframerate(3840)
 
-        source = self.voice_client.source
+        source = self.voice_client.source.read()
         async for chunk in source:
-            self.wave_file.writeframes(chunk)
+            if chunk.max() > 0:
+                self.wave_file.writeframes(chunk)
 
     async def stop(self):
         if not self.running:
